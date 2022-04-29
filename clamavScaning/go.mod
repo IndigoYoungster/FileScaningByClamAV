@@ -1,4 +1,4 @@
-module github.com/IndigoYoungster/FileScaningByClamAV/clamavcaning
+module github.com/IndigoYoungster/FileScaningByClamAV/clamavScaning
 
 go 1.18
 

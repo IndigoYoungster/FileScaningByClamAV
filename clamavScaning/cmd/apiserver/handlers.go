@@ -10,10 +10,6 @@ import (
 	"net/http"
 )
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Home Page")
-}
-
 func ping(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Ping correctly!")
 }
