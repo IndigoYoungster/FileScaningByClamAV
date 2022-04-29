@@ -23,7 +23,10 @@ func uploadFiles(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer localFile.Close()
 
-	io.Copy(localFile, file)
+	_, err = io.Copy(localFile, file)
+	check(err)
+	err = os.Chmod(localFile.Name(), 0755)
+	check(err)
 }
 
 func check(err error) {

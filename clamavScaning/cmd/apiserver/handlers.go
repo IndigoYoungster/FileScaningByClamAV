@@ -2,15 +2,19 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 )
 
 func ping(w http.ResponseWriter, r *http.Request) {
+	var bodyContent []byte
+	r.Body.Read(bodyContent)
+	r.Body.Close()
+	fmt.Println(bodyContent)
 	fmt.Fprint(w, "Ping correctly!")
 }
 
@@ -41,11 +45,19 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	check(err)
+	defer response.Body.Close()
 
+	//FOR SEND JSON ---->
 	io.Copy(w, response.Body)
 
+	//FOR SEND STRING ---->
+	//var respModel responseModel
+	//err = json.NewDecoder(response.Body).Decode(&respModel)
+	//check(err)
+	//fmt.Fprintln(w, respModel.String())
+
 	//FOR PRINT RESPONSE ---->
-	//fmt.Fprint(w, printResponse(response.Body))
+	//io.Copy(os.Stdout, response.Body)
 
 	//FOR SAVING FILES ---->
 	//saveFiles(fileHeader.Filename, file)
@@ -53,14 +65,9 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 
 func check(err error) {
 	if err != nil {
+		log.Fatalln(err)
 		panic(err)
 	}
-}
-
-func printResponse(respBody io.Reader) string {
-	var respModel responseModel
-	json.NewDecoder(respBody).Decode(&respModel)
-	return respModel.String()
 }
 
 func saveFiles(filename string, file multipart.File) {

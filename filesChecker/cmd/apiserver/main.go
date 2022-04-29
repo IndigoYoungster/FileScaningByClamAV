@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/internal/filesender"
 	"github.com/gorilla/mux"
 )
 
 const uploadFolder = "uploadFiles"
+const tickerDuration = time.Second * 5
 
 func main() {
 	addr := flag.String("addr", ":8082", "network port")
@@ -21,6 +24,8 @@ func main() {
 	myRouter.HandleFunc("/api/upload", uploadFiles).Methods("POST")
 
 	createFolder(uploadFolder)
+
+	go filesender.Scheduler(tickerDuration, uploadFolder)
 
 	fmt.Fprintf(log.Writer(), "Start listen on port %s\n", *addr)
 	err := http.ListenAndServe(*addr, myRouter)
