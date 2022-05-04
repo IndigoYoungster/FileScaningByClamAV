@@ -12,6 +12,7 @@ import (
 )
 
 const uploadFolder = "uploadFiles"
+const tempPrefix = "temp-"
 const tickerDuration = time.Second * 5
 
 func main() {

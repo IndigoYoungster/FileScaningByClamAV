@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 )
@@ -19,14 +18,13 @@ func uploadFiles(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer file.Close()
 
-	localFile, err := os.Create(uploadFolder + "/" + fileHeader.Filename)
-	check(err)
-	defer localFile.Close()
+	localZipTemp := createZipTemp(file, fileHeader.Filename)
+	defer os.Remove(localZipTemp.Name())
 
-	_, err = io.Copy(localFile, file)
-	check(err)
-	err = os.Chmod(localFile.Name(), 0755)
-	check(err)
+	jsonFileTemp := savingParams(r, localZipTemp.Name())
+	defer os.Remove(jsonFileTemp.Name())
+
+	saveParamsAndZip(localZipTemp.Name(), jsonFileTemp)
 }
 
 func check(err error) {
