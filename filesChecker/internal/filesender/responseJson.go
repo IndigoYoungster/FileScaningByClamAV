@@ -2,14 +2,13 @@ package filesender
 
 import (
 	"fmt"
-	"io"
 	"strings"
 )
 
 func (rm *responseModel) Read(p []byte) (n int, err error) {
 	result := rm.String()
 	n = copy(p, []byte(result))
-	return n, io.EOF
+	return n, nil
 }
 
 type responseModel struct {

@@ -1,8 +1,6 @@
 package filesender
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 )
@@ -16,30 +14,19 @@ func Scheduler(d time.Duration, folder string) {
 	for {
 		<-ticker.C
 
-		checkNewFilesInFolder(folder)
-	}
-}
+		filesToScan := checkNewFilesInFolder(folder)
 
-func checkNewFilesInFolder(folder string) {
-	files, err := ioutil.ReadDir(folder)
-	check(err)
+		if filesToScan != nil {
+			responseModel := sendFilesToScan(folder, filesToScan)
 
-	if len(files) == 0 {
-		fmt.Println("folder empty")
-		return
-	}
-
-	count := 0
-	var filesToScan []string
-	for _, file := range files {
-		filesToScan = append(filesToScan, file.Name())
-
-		count++
-		if count >= maxSendFilesCount {
-			break
+			correctFileNames := checkCorrectResponse(folder, responseModel)
+			if len(correctFileNames) != 0 {
+				for _, fileName := range correctFileNames {
+					sendFilesToDb(folder, fileName)
+				}
+			}
 		}
 	}
-	sendFilesToScan(folder, filesToScan)
 }
 
 func check(err error) {

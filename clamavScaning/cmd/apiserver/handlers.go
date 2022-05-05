@@ -35,6 +35,8 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 
 		_, err = io.Copy(fileWriter, file)
 		check(err)
+
+		file.Close()
 	}
 	multipartWriter.Close()
 
@@ -56,9 +58,7 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 	// FOR PRINT JSON ---->
 	// var respModel responseModel
 	// err = json.NewDecoder(resp.Body).Decode(&respModel)
-	// if err == io.EOF {
-	// 	log.Println("JSON decode complete success")
-	// }
+	// check(err)
 	// fmt.Println(respModel.String())
 }
 

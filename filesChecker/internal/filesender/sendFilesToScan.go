@@ -3,8 +3,6 @@ package filesender
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
@@ -13,7 +11,7 @@ import (
 	"time"
 )
 
-func sendFilesToScan(folder string, fileNames []string) {
+func sendFilesToScan(folder string, fileNames []string) *responseModel {
 	var b bytes.Buffer
 	multipartWriter := multipart.NewWriter(&b)
 
@@ -29,6 +27,8 @@ func sendFilesToScan(folder string, fileNames []string) {
 
 		_, err = fileWriter.Write(fileContents)
 		check(err)
+
+		file.Close()
 	}
 	multipartWriter.Close()
 
@@ -47,8 +47,10 @@ func sendFilesToScan(folder string, fileNames []string) {
 
 	var respModel responseModel
 	err = json.NewDecoder(resp.Body).Decode(&respModel)
-	if err == io.EOF {
-		log.Println("JSON decode complete success")
-	}
-	fmt.Print(respModel.String())
+	check(err)
+
+	// FOR PRINT RESPONSE MODEL ---->
+	log.Print(respModel.String())
+
+	return &respModel
 }
