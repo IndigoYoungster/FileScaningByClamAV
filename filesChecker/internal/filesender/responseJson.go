@@ -34,7 +34,7 @@ func (rm *responseModel) String() string {
 	if rm.Success {
 		sb.WriteString("Data:\n\tResult:\n")
 		for _, val := range rm.Data.Result {
-			sb.WriteString(fmt.Sprintf("\t\tName: %s\n\t\tIs infected: %t\n\t\tViruses: %v\n", val.Name, val.IsInfected, val.Viruses))
+			sb.WriteString(fmt.Sprintf("\t\tName: %s\n\t\tIs infected: %t\n\t\tViruses: %v\n\n", val.Name, val.IsInfected, val.Viruses))
 		}
 	}
 	return sb.String()

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const sendFilesCount = 4
+const maxSendFilesCount = 4
 
 func Scheduler(d time.Duration, folder string) {
 	ticker := time.NewTicker(d)
@@ -29,9 +29,17 @@ func checkNewFilesInFolder(folder string) {
 		return
 	}
 
+	count := 0
+	var filesToScan []string
 	for _, file := range files {
-		sendFilesToScan(folder, file.Name())
+		filesToScan = append(filesToScan, file.Name())
+
+		count++
+		if count >= maxSendFilesCount {
+			break
+		}
 	}
+	sendFilesToScan(folder, filesToScan)
 }
 
 func check(err error) {

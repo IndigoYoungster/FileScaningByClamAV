@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"time"
 )
 
 func ping(w http.ResponseWriter, r *http.Request) {
@@ -19,48 +19,47 @@ func ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendToScan(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(2048)
+	err := r.ParseMultipartForm(32 << 20) //32 MB
 	check(err)
 
-	file, fileHeader, err := r.FormFile("file")
-	check(err)
-	defer file.Close()
+	var b bytes.Buffer
+	multipartWriter := multipart.NewWriter(&b)
 
-	var requestBody bytes.Buffer
+	fileHeaders := r.MultipartForm.File["file"]
+	for _, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		check(err)
 
-	multipartWriter := multipart.NewWriter(&requestBody)
+		fileWriter, err := multipartWriter.CreateFormFile("FILES", fileHeader.Filename)
+		check(err)
 
-	fileWriter, err := multipartWriter.CreateFormFile("FILES", fileHeader.Filename)
-	check(err)
-
-	_, err = io.Copy(fileWriter, file)
-	check(err)
-
+		_, err = io.Copy(fileWriter, file)
+		check(err)
+	}
 	multipartWriter.Close()
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/scan", &requestBody)
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/scan", &b)
 	check(err)
+
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	client := &http.Client{}
-	response, err := client.Do(req)
+	timeout := time.Duration(time.Second * 5)
+	client := &http.Client{
+		Timeout: timeout,
+	}
+	resp, err := client.Do(req)
 	check(err)
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
-	//FOR SEND JSON ---->
-	io.Copy(w, response.Body)
+	io.Copy(w, resp.Body)
 
-	//FOR SEND STRING ---->
-	//var respModel responseModel
-	//err = json.NewDecoder(response.Body).Decode(&respModel)
-	//check(err)
-	//fmt.Fprintln(w, respModel.String())
-
-	//FOR PRINT RESPONSE ---->
-	//io.Copy(os.Stdout, response.Body)
-
-	//FOR SAVING FILES ---->
-	//saveFiles(fileHeader.Filename, file)
+	// FOR PRINT JSON ---->
+	// var respModel responseModel
+	// err = json.NewDecoder(resp.Body).Decode(&respModel)
+	// if err == io.EOF {
+	// 	log.Println("JSON decode complete success")
+	// }
+	// fmt.Println(respModel.String())
 }
 
 func check(err error) {
@@ -68,11 +67,4 @@ func check(err error) {
 		log.Fatalln(err)
 		panic(err)
 	}
-}
-
-func saveFiles(filename string, file multipart.File) {
-	fileBytes, err := ioutil.ReadAll(file)
-	check(err)
-	err = ioutil.WriteFile(filename, fileBytes, 0666)
-	check(err)
 }
