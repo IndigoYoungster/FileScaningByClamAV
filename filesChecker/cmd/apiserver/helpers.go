@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
 func createFolder(folderName string) {
@@ -17,7 +19,7 @@ func createFolder(folderName string) {
 }
 
 func createZipTemp(file multipart.File, fileName string) *os.File {
-	localZipTemp, err := os.Create(uploadFolder + "/" + tempPrefix + fileName)
+	localZipTemp, err := os.Create(uploadFolder + "/" + fileName)
 	check(err)
 	defer localZipTemp.Close()
 
@@ -28,7 +30,7 @@ func createZipTemp(file multipart.File, fileName string) *os.File {
 }
 
 func savingParams(r *http.Request, localZipTempName string) *os.File {
-	parameters := new(params)
+	parameters := new(models.Params)
 
 	forwarded := r.Header.Get("X-FORWARDED-FOR")
 	if forwarded != "" {
@@ -41,7 +43,6 @@ func savingParams(r *http.Request, localZipTempName string) *os.File {
 	parameters.Comp = r.FormValue("comp")
 
 	paramsFileName := strings.Replace(localZipTempName, ".zip", ".json", 1)
-	paramsFileName = strings.Replace(paramsFileName, tempPrefix, "", 1)
 	jsonFile, err := os.Create(paramsFileName)
 
 	check(err)
@@ -66,7 +67,7 @@ func saveParamsAndZip(localZipTempName string, file *os.File) {
 	check(err)
 	defer zipReader.Close()
 
-	targetFile, err := os.Create(strings.Replace(localZipTempName, tempPrefix, "", 1))
+	targetFile, err := os.Create(strings.Replace(localZipTempName, ".zip", tempPrefix+".zip", 1))
 	check(err)
 	defer targetFile.Close()
 
@@ -74,17 +75,18 @@ func saveParamsAndZip(localZipTempName string, file *os.File) {
 	defer targetZipWriter.Close()
 
 	for _, zipItem := range zipReader.File {
-		zipItemReader, err := zipItem.Open()
-		defer zipItemReader.Close()
-		check(err)
-		header, err := zip.FileInfoHeader(zipItem.FileInfo())
-		check(err)
-		header.Name = zipItem.Name
-		header.Method = zipItem.Method
-		targetItem, err := targetZipWriter.CreateHeader(header)
-		check(err)
-		_, err = io.Copy(targetItem, zipItemReader)
-		check(err)
+		targetZipWriter.Copy(zipItem)
+		// zipItemReader, err := zipItem.Open()
+		// defer zipItemReader.Close()
+		// check(err)
+		// header, err := zip.FileInfoHeader(zipItem.FileInfo())
+		// check(err)
+		// header.Name = zipItem.Name
+		// header.Method = zipItem.Method
+		// targetItem, err := targetZipWriter.CreateHeader(header)
+		// check(err)
+		// _, err = io.Copy(targetItem, zipItemReader)
+		// check(err)
 	}
 
 	fileBytes, err := os.ReadFile(jsonFile.Name())

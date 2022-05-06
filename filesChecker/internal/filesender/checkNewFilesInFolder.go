@@ -24,6 +24,5 @@ func checkNewFilesInFolder(folder string) []string {
 			break
 		}
 	}
-
 	return filesToScan
 }

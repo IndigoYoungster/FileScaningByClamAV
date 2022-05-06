@@ -3,9 +3,11 @@ package filesender
 import (
 	"log"
 	"os"
+
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func checkCorrectResponse(folder string, responseModel *responseModel) (correctFileNames []string) {
+func checkCorrectResponse(folder string, responseModel *models.ResponseModel) (correctFileNames []string) {
 	if responseModel.Success {
 		for _, result := range responseModel.Data.Result {
 			if !result.IsInfected {

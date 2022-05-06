@@ -45,7 +45,7 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	timeout := time.Duration(time.Second * 5)
+	timeout := time.Duration(time.Second * 10)
 	client := &http.Client{
 		Timeout: timeout,
 	}

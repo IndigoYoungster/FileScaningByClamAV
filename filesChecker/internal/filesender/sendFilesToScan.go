@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func sendFilesToScan(folder string, fileNames []string) *responseModel {
+func sendFilesToScan(folder string, fileNames []string) *models.ResponseModel {
 	var b bytes.Buffer
 	multipartWriter := multipart.NewWriter(&b)
 
@@ -37,7 +39,7 @@ func sendFilesToScan(folder string, fileNames []string) *responseModel {
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 
-	timeout := time.Duration(time.Second * 5)
+	timeout := time.Duration(time.Second * 10)
 	client := &http.Client{
 		Timeout: timeout,
 	}
@@ -45,7 +47,7 @@ func sendFilesToScan(folder string, fileNames []string) *responseModel {
 	check(err)
 	defer resp.Body.Close()
 
-	var respModel responseModel
+	var respModel models.ResponseModel
 	err = json.NewDecoder(resp.Body).Decode(&respModel)
 	check(err)
 
