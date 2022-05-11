@@ -1,0 +1,5 @@
+uploadFolder: "uploadFiles"
+tempPostfix: "-temp"
+network:
+  ip: "localhost"
+  port: "8082"

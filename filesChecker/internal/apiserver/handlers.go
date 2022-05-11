@@ -1,4 +1,4 @@
-package main
+package apiserver
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Ping is correct!")
 }
 
-func uploadFiles(w http.ResponseWriter, r *http.Request) {
+func (api *Api) uploadFiles(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(32 << 20)
 	check(err)
 
@@ -18,7 +18,7 @@ func uploadFiles(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	defer file.Close()
 
-	localZipTemp := createZipTemp(file, fileHeader.Filename)
+	localZipTemp := api.createZipTemp(file, fileHeader.Filename)
 	defer os.Remove(localZipTemp.Name())
 	defer localZipTemp.Close()
 
@@ -26,11 +26,5 @@ func uploadFiles(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(jsonFileTemp.Name())
 	defer jsonFileTemp.Close()
 
-	saveParamsAndZip(localZipTemp.Name(), jsonFileTemp)
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
+	api.saveParamsAndZip(localZipTemp.Name(), jsonFileTemp)
 }

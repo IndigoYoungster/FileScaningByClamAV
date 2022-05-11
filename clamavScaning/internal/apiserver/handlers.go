@@ -1,10 +1,9 @@
-package main
+package apiserver
 
 import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -18,7 +17,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Ping correctly!")
 }
 
-func sendToScan(w http.ResponseWriter, r *http.Request) {
+func (api *Api) sendToScan(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(32 << 20) //32 MB
 	check(err)
 
@@ -40,7 +39,7 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 	}
 	multipartWriter.Close()
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/scan", &b)
+	req, err := http.NewRequest("POST", api.Config.ClamavApi.Uri, &b)
 	check(err)
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
@@ -60,11 +59,4 @@ func sendToScan(w http.ResponseWriter, r *http.Request) {
 	// err = json.NewDecoder(resp.Body).Decode(&respModel)
 	// check(err)
 	// fmt.Println(respModel.String())
-}
-
-func check(err error) {
-	if err != nil {
-		log.Fatalln(err)
-		panic(err)
-	}
 }

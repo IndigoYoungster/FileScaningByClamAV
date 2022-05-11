@@ -1,4 +1,4 @@
-package main
+package apiserver
 
 import (
 	"archive/zip"
@@ -12,14 +12,8 @@ import (
 	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func createFolder(folderName string) {
-	if _, err := os.Stat(folderName); os.IsNotExist(err) {
-		os.MkdirAll(folderName, 0666)
-	}
-}
-
-func createZipTemp(file multipart.File, fileName string) *os.File {
-	localZipTemp, err := os.Create(uploadFolder + "/" + fileName)
+func (api *Api) createZipTemp(file multipart.File, fileName string) *os.File {
+	localZipTemp, err := os.Create(api.Config.UploadFolder + "/" + fileName)
 	check(err)
 	defer localZipTemp.Close()
 
@@ -55,7 +49,7 @@ func savingParams(r *http.Request, localZipTempName string) *os.File {
 	return jsonFile
 }
 
-func saveParamsAndZip(localZipTempName string, file *os.File) {
+func (api *Api) saveParamsAndZip(localZipTempName string, file *os.File) {
 	jsonFile, err := os.Open(file.Name())
 	check(err)
 	defer jsonFile.Close()
@@ -67,7 +61,7 @@ func saveParamsAndZip(localZipTempName string, file *os.File) {
 	check(err)
 	defer zipReader.Close()
 
-	targetFile, err := os.Create(strings.Replace(localZipTempName, ".zip", tempPrefix+".zip", 1))
+	targetFile, err := os.Create(strings.Replace(localZipTempName, ".zip", api.Config.TempPostfix+".zip", 1))
 	check(err)
 	defer targetFile.Close()
 
@@ -76,17 +70,6 @@ func saveParamsAndZip(localZipTempName string, file *os.File) {
 
 	for _, zipItem := range zipReader.File {
 		targetZipWriter.Copy(zipItem)
-		// zipItemReader, err := zipItem.Open()
-		// defer zipItemReader.Close()
-		// check(err)
-		// header, err := zip.FileInfoHeader(zipItem.FileInfo())
-		// check(err)
-		// header.Name = zipItem.Name
-		// header.Method = zipItem.Method
-		// targetItem, err := targetZipWriter.CreateHeader(header)
-		// check(err)
-		// _, err = io.Copy(targetItem, zipItemReader)
-		// check(err)
 	}
 
 	fileBytes, err := os.ReadFile(jsonFile.Name())

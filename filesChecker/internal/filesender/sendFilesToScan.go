@@ -13,7 +13,7 @@ import (
 	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func sendFilesToScan(folder string, fileNames []string) *models.ResponseModel {
+func (s *sender) sendFilesToScan(folder string, fileNames []string) *models.ResponseModel {
 	var b bytes.Buffer
 	multipartWriter := multipart.NewWriter(&b)
 
@@ -34,7 +34,7 @@ func sendFilesToScan(folder string, fileNames []string) *models.ResponseModel {
 	}
 	multipartWriter.Close()
 
-	req, err := http.NewRequest("POST", "http://localhost:8081/api/scan", &b)
+	req, err := http.NewRequest("POST", s.config.ScanFiles.Uri, &b)
 	check(err)
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())

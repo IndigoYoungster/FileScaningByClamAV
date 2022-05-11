@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-func checkNewFilesInFolder(folder string) []string {
+func (s *sender) checkNewFilesInFolder(folder string) []string {
 	files, err := ioutil.ReadDir(folder)
 	check(err)
 
@@ -20,7 +20,7 @@ func checkNewFilesInFolder(folder string) []string {
 		filesToScan = append(filesToScan, file.Name())
 
 		count++
-		if count >= maxSendFilesCount {
+		if count >= s.config.MaxSendFilesCount {
 			break
 		}
 	}

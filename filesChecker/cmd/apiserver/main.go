@@ -2,33 +2,26 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
-	"time"
 
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/internal/apiserver"
 	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/internal/filesender"
-	"github.com/gorilla/mux"
 )
 
-const uploadFolder = "uploadFiles"
-const tempPrefix = "-temp"
-const tickerDuration = time.Second * 5
-
 func main() {
-	addr := flag.String("addr", ":8082", "network port")
+	configFolder := flag.String("conf", "configs/", "configurations folder")
 	flag.Parse()
 
-	myRouter := mux.NewRouter().StrictSlash(true)
+	config := apiserver.NewConfig(*configFolder)
+	api := apiserver.NewApi(config)
 
-	myRouter.HandleFunc("/api/ping", ping).Methods("GET")
-	myRouter.HandleFunc("/api/upload", uploadFiles).Methods("POST")
+	apiserver.CreateFolder(api.Config.UploadFolder)
 
-	createFolder(uploadFolder)
+	configFileSender := filesender.NewConfig(*configFolder)
+	fileSender := filesender.NewSender(configFileSender)
 
-	go filesender.Scheduler(tickerDuration, uploadFolder)
+	go fileSender.Start(api.Config.UploadFolder)
 
-	fmt.Fprintf(log.Writer(), "Start listen on port %s\n", *addr)
-	err := http.ListenAndServe(*addr, myRouter)
+	err := api.Start()
 	log.Fatal(err)
 }

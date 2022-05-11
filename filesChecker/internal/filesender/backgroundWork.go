@@ -3,47 +3,26 @@ package filesender
 import (
 	"log"
 	"os"
-	"time"
 )
 
-const maxSendFilesCount = 4
-const tempPrefix = "-temp"
+func (s *sender) Schedule(folder string) {
+	filesToScan := s.checkNewFilesInFolder(folder)
 
-// for test
-const sendToDb = false
+	if filesToScan != nil {
+		responseModel := s.sendFilesToScan(folder, filesToScan)
 
-func Scheduler(d time.Duration, folder string) {
-	ticker := time.NewTicker(d)
-	defer ticker.Stop()
-
-	for {
-		<-ticker.C
-
-		filesToScan := checkNewFilesInFolder(folder)
-
-		if filesToScan != nil {
-			responseModel := sendFilesToScan(folder, filesToScan)
-
-			correctFileNames := checkCorrectResponse(folder, responseModel)
-			if len(correctFileNames) != 0 {
-				for _, fileName := range correctFileNames {
-					if sendToDb {
-						sendingFileName, params := getFileAndParams(folder, fileName)
-						sendFilesToDb(sendingFileName, params)
-					} else {
-						sendingFileName, params := getFileAndParams(folder, fileName)
-						os.Remove(sendingFileName)
-						log.Printf("File %s - Correct after check\nParams--->\n%s\n", fileName, params.String())
-					}
+		correctFileNames := checkCorrectResponse(folder, responseModel)
+		if len(correctFileNames) != 0 {
+			for _, fileName := range correctFileNames {
+				if s.config.CrashDb.SendToDb {
+					sendingFileName, params := s.getFileAndParams(folder, fileName)
+					s.sendFilesToDb(sendingFileName, params)
+				} else {
+					sendingFileName, params := s.getFileAndParams(folder, fileName)
+					os.Remove(sendingFileName)
+					log.Printf("File %s - Correct after check\nParams--->\n%s\n", fileName, params.String())
 				}
 			}
 		}
-	}
-}
-
-func check(err error) {
-	if err != nil {
-		log.Fatalln(err)
-		panic(err)
 	}
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func sendFilesToDb(fileName string, params *models.Params) {
+func (s *sender) sendFilesToDb(fileName string, params *models.Params) {
 	var buf bytes.Buffer
 	multipartWriter := multipart.NewWriter(&buf)
 
@@ -40,8 +40,8 @@ func sendFilesToDb(fileName string, params *models.Params) {
 	multipartWriter.Close()
 
 	//TODO: change to the working address of the database
-	req, err := http.NewRequest("POST", "http://localhost:8083/api/test", &buf)
-	//req, err := http.NewRequest("POST", "http://localhost:8083/api/test"+requestParams, &buf)
+	req, err := http.NewRequest("POST", s.config.CrashDb.Uri, &buf)
+	//req, err := http.NewRequest("POST", s.config.CrashDb.Uri+requestParams, &buf)
 	check(err)
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
@@ -63,20 +63,20 @@ func sendFilesToDb(fileName string, params *models.Params) {
 	log.Printf("Status code : %s\nBody: %s\n", resp.Status, bodyString)
 }
 
-func getFileAndParams(folder, fileName string) (zipFileName string, params *models.Params) {
+func (s *sender) getFileAndParams(folder, fileName string) (zipFileName string, params *models.Params) {
 	zipReader, err := zip.OpenReader(folder + "/" + fileName)
 	check(err)
 	defer os.Remove(folder + "/" + fileName)
 	defer zipReader.Close()
 
-	targetZipFile, err := os.Create(folder + "/" + strings.Replace(fileName, tempPrefix, "", 1))
+	targetZipFile, err := os.Create(folder + "/" + strings.Replace(fileName, s.config.TempPostfix, "", 1))
 	check(err)
 	defer targetZipFile.Close()
 
 	targetZipWriter := zip.NewWriter(targetZipFile)
 	defer targetZipWriter.Close()
 
-	targetJsonName := strings.Replace(fileName, tempPrefix+".zip", ".json", 1)
+	targetJsonName := strings.Replace(fileName, s.config.TempPostfix+".zip", ".json", 1)
 	params = new(models.Params)
 
 	for _, zipItem := range zipReader.File {
