@@ -2,7 +2,7 @@ maxSendFilesCount: 4
 tickerDuration: 5
 tempPostfix: "-temp"
 scanFiles:
-  uri: "http://localhost:8081/api/scan"
+  uri: "http://host.docker.internal:8081/api/scan"
 crashDb:
   sendToDb: false
   uri: http://Db

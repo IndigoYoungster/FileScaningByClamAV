@@ -1,0 +1,50 @@
+version: '3.4'
+
+services:
+  clamd:
+    image: clamav/clamav:0.104.1
+    restart: unless-stopped
+    networks:
+      - clam-net
+  api:
+    image: benzino77/clamav-rest-api
+    restart: unless-stopped
+    depends_on:
+      - clamd
+    environment:
+      - NODE_ENV=production
+      - CLAMD_IP=clamd
+      - APP_FORM_KEY=FILES
+      - APP_PORT=3000
+    ports:
+      - '8080:3000'
+    networks:
+      - clam-net
+  clamavscaning:
+    image: ${DOCKER_REGISTRY-}clamavscaning
+    build:
+      context: ./clamavScaning
+      dockerfile: Dockerfile
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - clam-net
+  fileschecker:
+    image: ${DOCKER_REGISTRY-}fileschecker
+    build:
+      context: ./filesChecker
+      dockerfile: Dockerfile
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8082:8082"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - clam-net
+networks:
+  clam-net:

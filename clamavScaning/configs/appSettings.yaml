@@ -1,6 +1,6 @@
 network:
-  ip: "localhost"
+  ip: "0.0.0.0"
   port: "8081"
 clamavApi:
-  uri: "http://localhost:8080/api/v1/scan"
+  uri: "http://host.docker.internal:8080/api/v1/scan"
   
