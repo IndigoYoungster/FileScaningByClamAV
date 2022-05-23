@@ -2,27 +2,29 @@ package filesender
 
 import (
 	"log"
-	"time"
+	"os"
 )
 
 type sender struct {
-	config *Configuration
+	Config *Configuration
 }
 
 func NewSender(config *Configuration) *sender {
 	return &sender{
-		config: config,
+		Config: config,
 	}
 }
 
-func (s *sender) Start(folder string) {
-	ticker := time.NewTicker(time.Second * time.Duration(s.config.TickerDuration))
-	defer ticker.Stop()
+func (s *sender) Start(file *os.File) {
+	reExtractFile, params := s.reExtractFile(file)
 
-	for {
-		<-ticker.C
+	log.Printf("SUCCESS reExtract file - %s\nParams: %s\n", reExtractFile.Name(), params.String())
+	s.sendFileToDb(reExtractFile, params)
+}
 
-		s.Schedule(folder)
+func (s *sender) СreateFolder(folderName string) {
+	if _, err := os.Stat(folderName); os.IsNotExist(err) {
+		os.MkdirAll(folderName, 0666)
 	}
 }
 

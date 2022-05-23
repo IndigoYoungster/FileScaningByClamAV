@@ -8,17 +8,12 @@ import (
 )
 
 type Configuration struct {
-	Network   network   `yaml:"network"`
-	ClamavApi clamavApi `yaml:"clamavApi"`
+	Network network `yaml:"network"`
 }
 
 type network struct {
 	Ip   string `yaml:"ip"`
 	Port string `yaml:"port"`
-}
-
-type clamavApi struct {
-	Uri string `yaml:"uri"`
 }
 
 func NewConfig(folderPath string) (config *Configuration) {

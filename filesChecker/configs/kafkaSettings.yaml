@@ -1,0 +1,11 @@
+kafkaConsumer:
+  topic: "files-from-scan-topic"
+  partition: 0
+  queueCapacity: 4
+  groupId: "FromScanGroup"
+  brokers: 
+    - "127.0.0.1:9092"
+
+kafkaProducer:
+  addr: "127.0.0.1:9092"
+  topic: "files-to-scan-topic"

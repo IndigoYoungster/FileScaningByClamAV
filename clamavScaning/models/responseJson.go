@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-func (rm *responseModel) Read(p []byte) (n int, err error) {
+func (rm *ResponseModel) Read(p []byte) (n int, err error) {
 	result := rm.String()
 	n = copy(p, []byte(result))
 	return n, nil
 }
 
-type responseModel struct {
+type ResponseModel struct {
 	Success bool `json:"success"`
 	Data    data `json:"data"`
 }
@@ -26,7 +26,7 @@ type result struct {
 	Viruses    []string `json:"viruses"`
 }
 
-func (rm *responseModel) String() string {
+func (rm *ResponseModel) String() string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("Success: %t\n", rm.Success))

@@ -5,18 +5,23 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/internal/kafka"
 	"github.com/gorilla/mux"
 )
 
 type Api struct {
-	Config *Configuration
-	Router *mux.Router
+	Config     *Configuration
+	Router     *mux.Router
+	Kafka      *kafka.Kafka
+	FileChanel chan *os.File
 }
 
-func NewApi(config *Configuration) *Api {
+func NewApi(config *Configuration, kafConfig *kafka.Configuration) *Api {
 	api := &Api{
-		Config: config,
-		Router: mux.NewRouter().StrictSlash(true),
+		Config:     config,
+		Router:     mux.NewRouter().StrictSlash(true),
+		Kafka:      kafka.NewKafka(kafConfig),
+		FileChanel: make(chan *os.File, 3),
 	}
 	return api
 }

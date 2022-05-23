@@ -10,12 +10,9 @@ import (
 )
 
 type Configuration struct {
-	MaxSendFilesCount int           `yaml:"maxSendFilesCount"`
-	TickerDuration    int           `yaml:"tickerDuration"`
-	TempPostfix       string        `yaml:"tempPostfix"`
-	ScanFiles         scanFiles     `yaml:"scanFiles"`
-	CrashDb           crashDb       `yaml:"crashDb"`
-	TestDbRequest     testDbRequest `yaml:"testDbRequest"`
+	UploadFolder  string        `yaml:"uploadFolder"`
+	CrashDb       crashDb       `yaml:"crashDb"`
+	TestDbRequest testDbRequest `yaml:"testDbRequest"`
 }
 
 type scanFiles struct {
@@ -23,8 +20,7 @@ type scanFiles struct {
 }
 
 type crashDb struct {
-	SendToDb bool   `yaml:"sendToDb"`
-	Uri      string `yaml:"uri"`
+	Uri string `yaml:"uri"`
 }
 
 type testDbRequest struct {
@@ -32,7 +28,7 @@ type testDbRequest struct {
 }
 
 func (c *Configuration) String() string {
-	return fmt.Sprintf("MaxSendFilesCount: %d\nTickerDuration: %d\nTempPostfix: %s\nScanFiles: %v\nCrashDb: %v\nTestDbRequest: %v\n", c.MaxSendFilesCount, c.TickerDuration, c.TempPostfix, c.ScanFiles, c.CrashDb, c.TestDbRequest)
+	return fmt.Sprintf("UploadFolder: %s\nCrashDb: %v\nTestDbRequest: %v\n", c.UploadFolder, c.CrashDb, c.TestDbRequest)
 }
 
 func NewConfig(folderPath string) (config *Configuration) {

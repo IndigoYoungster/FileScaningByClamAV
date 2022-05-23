@@ -1,9 +1,7 @@
 package filesender
 
 import (
-	"archive/zip"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -16,32 +14,37 @@ import (
 	"github.com/IndigoYoungster/FileScaningByClamAV/filesChecker/models"
 )
 
-func (s *sender) sendFilesToDb(fileName string, params *models.Params) {
+func (s *sender) sendFileToDb(file *os.File, params *models.Params) {
 	var buf bytes.Buffer
 	multipartWriter := multipart.NewWriter(&buf)
 
-	file, err := os.Open(fileName)
+	file, err := os.Open(file.Name())
 	check(err)
 	defer os.Remove(file.Name())
 	defer file.Close()
 
-	fileWriter, err := multipartWriter.CreateFormFile("file", fileName)
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Printf("Error fileOpen.Stat()\nMessage: %v\n", err.Error())
+	}
+	fileWriter, err := multipartWriter.CreateFormFile("file", fileInfo.Name())
 	check(err)
 
 	_, err = io.Copy(fileWriter, file)
 	check(err)
 
-	// for add params to form
+	// TODO: сделать в конфиге поле для выбора куда вставлять параметры.
+	// For add params to form.
 	setParamsToFields(multipartWriter, params)
 
-	// for add params to uri
+	// For add params to uri.
 	//requestParams := setParamsToUri(params)
 
 	multipartWriter.Close()
 
 	//TODO: change to the working address of the database
-	req, err := http.NewRequest("POST", s.config.CrashDb.Uri, &buf)
-	//req, err := http.NewRequest("POST", s.config.CrashDb.Uri+requestParams, &buf)
+	req, err := http.NewRequest("POST", s.Config.TestDbRequest.Uri, &buf)
+	//req, err := http.NewRequest("POST", s.Config.TestDbRequest.Uri+requestParams, &buf)
 	check(err)
 
 	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
@@ -61,40 +64,6 @@ func (s *sender) sendFilesToDb(fileName string, params *models.Params) {
 	check(err)
 	bodyString := string(bodyBytes)
 	log.Printf("Status code : %s\nBody: %s\n", resp.Status, bodyString)
-}
-
-func (s *sender) getFileAndParams(folder, fileName string) (zipFileName string, params *models.Params) {
-	zipReader, err := zip.OpenReader(folder + "/" + fileName)
-	check(err)
-	defer os.Remove(folder + "/" + fileName)
-	defer zipReader.Close()
-
-	targetZipFile, err := os.Create(folder + "/" + strings.Replace(fileName, s.config.TempPostfix, "", 1))
-	check(err)
-	defer targetZipFile.Close()
-
-	targetZipWriter := zip.NewWriter(targetZipFile)
-	defer targetZipWriter.Close()
-
-	targetJsonName := strings.Replace(fileName, s.config.TempPostfix+".zip", ".json", 1)
-	params = new(models.Params)
-
-	for _, zipItem := range zipReader.File {
-		if zipItem.Name == targetJsonName {
-			fileRCJson, err := zipItem.Open()
-			check(err)
-
-			err = json.NewDecoder(fileRCJson).Decode(params)
-			check(err)
-
-			fileRCJson.Close()
-			continue
-		}
-		err = targetZipWriter.Copy(zipItem)
-		check(err)
-	}
-
-	return targetZipFile.Name(), params
 }
 
 func setParamsToFields(multipartWriter *multipart.Writer, params *models.Params) {

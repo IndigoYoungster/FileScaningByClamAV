@@ -26,5 +26,7 @@ func (api *Api) uploadFiles(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(jsonFileTemp.Name())
 	defer jsonFileTemp.Close()
 
-	api.saveParamsAndZip(localZipTemp.Name(), jsonFileTemp)
+	targetFile := api.saveParamsAndZip(localZipTemp.Name(), jsonFileTemp)
+
+	api.FileChanel <- targetFile
 }

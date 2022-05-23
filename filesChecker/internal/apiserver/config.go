@@ -10,9 +10,9 @@ import (
 )
 
 type Configuration struct {
-	UploadFolder string  `yaml:"uploadFolder"`
-	TempPostfix  string  `yaml:"tempPostfix"`
-	Network      network `yaml:"network"`
+	TempFolder  string  `yaml:"tempFolder"`
+	TempPostfix string  `yaml:"tempPostfix"`
+	Network     network `yaml:"network"`
 }
 
 type network struct {
@@ -21,7 +21,7 @@ type network struct {
 }
 
 func (c *Configuration) String() string {
-	return fmt.Sprintf("UploadFolder : %s\nTempPostfix : %s\nNetwork : %v\n", c.UploadFolder, c.TempPostfix, c.Network)
+	return fmt.Sprintf("TempFolder : %s\nTempPostfix : %s\nNetwork : %v\n", c.TempFolder, c.TempPostfix, c.Network)
 }
 
 func NewConfig(folderPath string) (config *Configuration) {

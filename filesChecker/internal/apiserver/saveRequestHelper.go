@@ -13,7 +13,7 @@ import (
 )
 
 func (api *Api) createZipTemp(file multipart.File, fileName string) *os.File {
-	localZipTemp, err := os.Create(api.Config.UploadFolder + "/" + fileName)
+	localZipTemp, err := os.Create(api.Config.TempFolder + "/" + fileName)
 	check(err)
 	defer localZipTemp.Close()
 
@@ -49,7 +49,7 @@ func savingParams(r *http.Request, localZipTempName string) *os.File {
 	return jsonFile
 }
 
-func (api *Api) saveParamsAndZip(localZipTempName string, file *os.File) {
+func (api *Api) saveParamsAndZip(localZipTempName string, file *os.File) *os.File {
 	jsonFile, err := os.Open(file.Name())
 	check(err)
 	defer jsonFile.Close()
@@ -81,4 +81,6 @@ func (api *Api) saveParamsAndZip(localZipTempName string, file *os.File) {
 
 	err = targetZipWriter.Flush()
 	check(err)
+
+	return targetFile
 }

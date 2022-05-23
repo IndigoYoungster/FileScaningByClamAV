@@ -22,7 +22,6 @@ func NewApi(config *Configuration) *Api {
 
 func (api *Api) Start() error {
 	api.Router.HandleFunc("/api/ping", ping).Methods("GET")
-	api.Router.HandleFunc("/api/scan", api.sendToScan).Methods("POST")
 
 	addr := api.Config.Network.Ip + ":" + api.Config.Network.Port
 	fmt.Printf("Start listen on address %s\n", addr)

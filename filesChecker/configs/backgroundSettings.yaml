@@ -1,10 +1,5 @@
-maxSendFilesCount: 4
-tickerDuration: 5
-tempPostfix: "-temp"
-scanFiles:
-  uri: "http://host.docker.internal:8081/api/scan"
+uploadFolder: "uploadFiles"
 crashDb:
-  sendToDb: false
-  uri: http://Db
+  uri: http://DbAPI
 testDbRequest:
   uri: "http://localhost:8083/api/test"
